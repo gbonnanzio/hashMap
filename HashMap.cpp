@@ -65,7 +65,7 @@ int hashMap::getIndex(string k) {
 			}
 		else{
 			hashcoll = hashcoll + 1;
-			int newIndex = coll2(firstIndex, firstIndex, k);
+			int newIndex = coll2(firstIndex, firstIndex, k); //
 			return newIndex;
 		}
 	}
