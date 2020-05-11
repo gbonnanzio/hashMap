@@ -5,7 +5,7 @@
  *      Author: 13027
  */
 
-
+/*
 #include "hashMap.hpp"
 #include "hashNode.hpp"
 #include <iostream>
@@ -311,5 +311,353 @@ void hashMap::printMap() {
 		}
 	}
 }
+*/
 
+//Chloe's code from 5-11-20
+
+/*
+ * HashMap.cpp
+ *
+ *  Created on: May 4, 2020
+ *      Author: 13027
+ */
+
+
+#include "hashMap.hpp"
+#include "hashNode.hpp"
+#include <iostream>
+#include <math.h>
+using namespace std;
+
+hashMap::hashMap(bool hash1, bool coll1) {
+	map = new hashNode *[11];
+	for (int i=0;i<11;i++){
+		//map[i]=new hashNode();
+		map[i]=NULL;
+
+	}
+	first = "";
+	numKeys=0;
+	mapSize = 11;
+	hashfn=hash1;
+	collfn=coll1;
+	collisions=0;
+	hashcoll=0;
+}
+
+void hashMap::printMap() {
+	cout << "In printMap()" << endl;
+	for (int i = 0; i < mapSize; i++) {
+		//cout << "In loop" << endl;
+		if (map[i] != NULL) {
+			cout << map[i]->keyword << ": ";
+			for (int j = 0; j < map[i]->currSize;j++) {
+				cout << map[i]->values[j] << ", ";
+			}
+			cout << endl;
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void hashMap::addKeyValue(string k, string v) {
+	//cout << k << mapSize <<numKeys<< endl;
+	int Index = getIndex(k);
+	if (map[Index]==NULL){
+		map[Index]=new hashNode(k,v);
+		numKeys++;
+	}
+	else if (map[Index]!=NULL && map[Index]->keyword.compare(k)==0){
+		map[Index]->addValue(v);
+	}
+	else {
+		collisions++;
+		if (collfn){
+			int loopcounter=0;
+			while ((map[Index]!=NULL && map[Index]->keyword.compare(k)!=0)){
+				Index = coll1(Index,loopcounter,k);
+				loopcounter++;
+			}
+			hashcoll=hashcoll+(loopcounter-1);
+			if (map[Index]==NULL){
+				map[Index]=new hashNode(k,v);
+				numKeys++;
+			}
+			else {
+				map[Index]->addValue(v);
+			}
+		}
+		else {
+			int loopcounter=0;
+			while ((map[Index]!=NULL && map[Index]->keyword.compare(k)!=0)){
+				Index = coll2(Index,loopcounter,k);
+				loopcounter++;
+			}
+			hashcoll=hashcoll+(loopcounter-1);
+			if (map[Index]==NULL){
+				map[Index]=new hashNode(k,v);
+				numKeys++;
+			}
+			else {
+				map[Index]->addValue(v);
+			}
+		}
+		//keep calling collisions method until we get to a spot where we can use
+		//need to keep track of if we add a key
+		//keep track of total collisions added now
+		//keep track of hashColl
+	}
+	if (first==""){
+		first=k;
+	}
+	double ratio  = (double)numKeys/(double)mapSize;
+	if (ratio>0.7){
+		reHash();
+	}
+}
+int hashMap::getIndex(string k) {
+	if (hashfn){
+		//cout << "calc is "<<calcHash1(k)<<endl;
+		return calcHash1(k);
+	}
+	else {
+		return calcHash2(k);
+	}
+}
+
+int hashMap::calcHash2(string k){
+	int length = k.size();
+	int sum = 0;
+	int templength;
+	if (length<3){
+		templength=length;
+	}
+	else {
+		templength = 3;
+	}
+	for(int i = 0; i<templength; i++){
+		sum = sum + pow(27,i)*(int)k[i];
+	}
+	int hash = sum%mapSize;
+	return hash;
+}
+int hashMap::calcHash1(string k){
+	int length = k.size();
+	int sum = 0;
+	int templength;
+	if (length<3){
+		templength=length;
+	}
+	else {
+		templength = 3;
+	}
+	for(int i = 0; i<templength; i++){
+		sum = sum + pow((int)k[i],i+1);
+	}
+	int hash = sum%mapSize;
+	return hash;
+}
+
+
+void hashMap::getClosestPrime() {
+	int testNum = mapSize;
+	bool nofactors = true;
+	while (nofactors){
+		testNum++; //try the next number
+		//go through all the numbers and if we can't find any facotrs
+		//then we switch no factors to false
+		bool interiorfactors = false;
+		for (int i = 2; i<testNum; i++){
+			if (testNum%i==0){
+				interiorfactors=true;
+			}
+		}
+		if (interiorfactors==false){
+			nofactors=false;
+		}
+	}
+	mapSize=testNum;
+	//this needs to change mapSize
+}
+
+
+void hashMap::reHash() {
+	int temp = mapSize;
+	hashNode* oldHashMap[temp];
+	for (int i=0;i<temp;i++){
+		oldHashMap[i]=map[i];
+	}
+	mapSize=mapSize*2;
+	getClosestPrime();
+
+
+	//int temp2 = mapSize;
+	//hashMap(hashfn,collfn);
+	//mapSize=temp2;
+
+	//hashNode* newHashMap[mapSize];
+	map = new hashNode*[mapSize];
+	for (int i=0;i<mapSize;i++){
+		map[i]=NULL;
+
+	}
+	first = "";
+	numKeys=0;
+
+
+
+	//now we need to iterate through all of the nodes in the old map and place them in the new
+	for(int i=0;i<temp;i++){
+		if (oldHashMap[i]!=NULL){
+			string k = oldHashMap[i]->keyword;
+			int j=0;
+			while (oldHashMap[i]->values[j]!=""){
+				addKeyValue(k,oldHashMap[i]->values[j]);
+				j++;
+			}
+		}
+	}
+}
+
+//writing two methods that finds the new
+//index if the original hash function returns an index that is already occupied by a node with a key that isn’t the one
+//you are inserting. You will be comparing these two methods by using a separate field to keep track of the
+//secondary collisions (those that happen as a result of the probing, as opposed to those that resulted from the
+//original hash function). For these methods you can use chaining, linear probing, quadratic probing, pseudo-random
+//probing, double-hashing, or any other method you come up with. Make sure to CLEARLY document and explain
+//the methods you chose.
+
+int hashMap::coll1(int h, int i, string k){//linear probing
+	if (h+1==mapSize){
+		return 0;
+	}
+	else {
+		return h+1;
+	}
+}
+
+int hashMap::coll2(int h, int i, string k){//quadratic probing
+	int change = (i+1)^2;
+	if (h+change>=mapSize){
+		return (h+change)%mapSize;
+	}
+	else {
+		return h+change;
+	}
+}
+
+//int hashMap::coll1(int h, int i, string k) { //linear probing
+//	if (map[i]==NULL || (map[i]->keyword).compare(k)!=0){
+//		return i;
+//	}
+//	else {
+//		if (i+1==mapSize){
+//			coll1(h,0,k);
+//		}
+//		else {
+//			coll1(h,i+1,k);
+//		}
+//	}
+//}
+//int hashMap::coll2(int h, int i, string k) { //quadratic probing
+//	int count = 1;
+//	if (map[i]==NULL || (map[i]->keyword).compare(k)!=0){
+//		return i;
+//	}
+//	else {
+//		int change= count^2;
+//		if(i+change==mapSize){
+//			count++;
+//			coll1(h,0,k);
+//		}
+//		else {
+//			count++;
+//			coll1(h,i+change,k);
+//		}
+//	}
+//}
+
+
+
+int hashMap::findKey(string k) {
+//NOTE: THIS METHOD CANNOT LOOP from index 0 to end of hash array looking for the key.  That destroys any efficiency in run-time.
+
+	if(hashfn == true){
+		int firstIndex = calcHash1(k);
+		if((map[firstIndex]->keyword).compare("")==0){
+			return -1;
+		}
+		else if((map[firstIndex]->keyword).compare(k)==0){
+			return firstIndex;
+		}
+		else if(collfn == true){
+			while ((map[firstIndex]!=NULL && map[firstIndex]->keyword.compare(k)!=0)){
+				firstIndex = coll1(firstIndex,0,k);
+			}
+			if((map[firstIndex]->keyword).compare(k)==0){
+				return firstIndex;
+			}
+			else{
+				return -1;
+			}
+		}
+		else{
+			while ((map[firstIndex]!=NULL && map[firstIndex]->keyword.compare(k)!=0)){
+				firstIndex = coll2(firstIndex,0,k);
+			}
+			if((map[firstIndex]->keyword).compare(k)==0){
+				return firstIndex;
+			}
+			else{
+				return -1;
+			}
+		}
+	}
+	else{
+		int firstIndex = calcHash2(k);
+		if((map[firstIndex]->keyword).compare("")==0){
+			return -1;
+		}
+		else if((map[firstIndex]->keyword).compare(k)==0){
+			return firstIndex;
+		}
+		else if(collfn == true){
+			while ((map[firstIndex]!=NULL && map[firstIndex]->keyword.compare(k)!=0)){
+				firstIndex = coll1(firstIndex,0,k);
+			}
+			if((map[firstIndex]->keyword).compare(k)==0){
+				return firstIndex;
+			}
+			else{
+				return -1;
+			}
+		}
+		else{
+			while ((map[firstIndex]!=NULL && map[firstIndex]->keyword.compare(k)!=0)){
+				firstIndex = coll2(firstIndex,0,k);
+			}
+			if((map[firstIndex]->keyword).compare(k)==0){
+				return firstIndex;
+			}
+			else{
+				return -1;
+			}
+		}
+	}
+
+
+
+}
 

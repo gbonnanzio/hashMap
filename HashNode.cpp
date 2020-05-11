@@ -46,6 +46,9 @@ void hashNode::addValue(string v) {
 	}
 	values[count]=v;
 	currSize++;
+	if (currSize==valuesSize){
+		dblArray();
+	}
 }
 void hashNode::dblArray() {
 	// when the value array gets full, you need to make a new 
