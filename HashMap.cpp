@@ -169,7 +169,29 @@ int hashMap::calcHash1(string k){
 
 
 void hashMap::getClosestPrime() {
+	int testNum = mapSize + 1;
+	bool primeCheck = isPrime(testNum);
+	while(primeCheck == false){
+		testNum++;
+		primeCheck = isPrime(testNum);
+	}
+	mapSize = testNum;
 }
+
+bool hashMap::isPrime(int testNum){
+	//returns true if checkNum is prime
+	int numSqrRoot = floor(sqrt(testNum));
+	bool checker;
+	int val;
+	for(int i=2; i<numSqrRoot; i++){
+		val = testNum%i;
+		if(val == 0){
+			return true;
+		}
+	}
+	return false;
+}
+
 void hashMap::reHash() {
 }
 int hashMap::coll1(int h, int i, string k) {
