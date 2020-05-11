@@ -13,10 +13,79 @@
 using namespace std;
 
 hashMap::hashMap(bool hash1, bool coll1) {
+	hashNode **map = new hashNode[10];
+	for(int i = 0; i < 10; i++){
+		map[i] = hashNode();
+	}
+	mapSize = 10;
+	first = map[1];
+	numKeys = 0;
+	hashfn = hash1;
+	collfn = coll1;
+	collisions = 0;
+	hashcoll = 0;
+
 }
 void hashMap::addKeyValue(string k, string v) {
+
+	int Index = getIndex(k);
+	hashNode *newNode = hashNode(k, v);
+	if((map[Index]->keyword).compare("")==0){
+		map[Index] = newNode;
+		numKeys = numKeys+1;
+	}
+	else{
+		map[Index]->addValue(k);
+	}
+	int load = numKeys/mapSize;
+	if(load > 0.7){
+		reHash();
+	}
+	return;
+
 }
+
+
 int hashMap::getIndex(string k) {
+
+	if(hashfn == true){
+		int firstIndex = calcHash1(k);
+		if((map[firstIndex]->keyword).compare("")==0){
+			return firstIndex;
+		}
+		else if((map[firstIndex]->keyword).compare(k)==0){
+			return firstIndex;
+		}
+		else if(collfn == true){
+			hashcoll = hashcoll + 1;
+			int newIndex = coll1(firstIndex, 0, k);
+			return newIndex;
+			}
+		else{
+			hashcoll = hashcoll + 1;
+			int newIndex = coll2(firstIndex, 0, k);
+			return newIndex;
+		}
+	}
+	else{
+		int firstIndex = calcHash2(k);
+		if((map[firstIndex]->keyword).compare("")==0){
+			return firstIndex;
+		}
+		else if((map[firstIndex]->keyword).compare(k)==0){
+			return firstIndex;
+		}
+		else if(collfn == true){
+			hashcoll = hashcoll + 1;
+			int newIndex = coll1(firstIndex, 0, k);
+			return newIndex;
+		}
+		else{
+			hashcoll = hashcoll + 1;
+			int newIndex = coll2(firstIndex, 0, k);
+			return newIndex;
+		}
+	}
 }
 
 
@@ -217,12 +286,50 @@ void hashMap::reHash() {
 }
 
 
-int hashMap::coll1(int h, int i, string k) {
+
+
+
+
+int hashMap::coll1(int h, int i, string k) { //linear probing
+	if (map[i]==NULL || (map[i]->keyword).compare(k)==0){
+		return i;
+	}
+	else {
+		if (i+1==mapSize){
+			coll1(h,0,k);
+		}
+		else {
+			coll1(h,i+1,k);
+		}
+	}
 }
-int hashMap::coll2(int h, int i, string k) {
+
+int hashMap::coll2(int h, int i, string k) { //quadratic probing
+	int count = 1;
+	if (map[i]==NULL || (map[i]->keyword).compare(k)==0){
+		return i;
+	}
+	else {
+		int change= count^2;
+		if(i+change==mapSize){
+			count++;
+			coll1(h,0,k);
+		}
+		else {
+			count++;
+			coll1(h,i+change,k);
+		}
+	}
 }
+
+
+
+
+
+
 int hashMap::findKey(string k) {
 //NOTE: THIS METHOD CANNOT LOOP from index 0 to end of hash array looking for the key.  That destroys any efficiency in run-time. 
+
 }
 
 
