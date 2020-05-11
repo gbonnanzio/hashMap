@@ -193,7 +193,30 @@ bool hashMap::isPrime(int testNum){
 }
 
 void hashMap::reHash() {
+	//clone current map
+	int prevSize = mapSize;
+	hashNode** oldHashMap = new hashNode[prevSize];
+	for(int i = 0; i<prevSize; i++){
+		oldHashMap[i] = map[i];
+	}
+	//create and assign our new map
+	mapSize = 2*mapSize;
+	getClosestPrime();
+	hashNode** newHashMap = new hashNode[mapSize];
+	map = newHashMap;
+	//place old values in new map
+	for(int i = 0; i<prevSize; i++){
+		if(oldHashMap[i]!=NULL){
+			string key = oldHashMap[i]->keyword;
+			for(int j=0; j<oldHashMap[i]->currSize; j++){
+				string val = oldHashMap[i]->values[j];
+				addKeyValue(key,val);
+			}
+		}
+	}
 }
+
+
 int hashMap::coll1(int h, int i, string k) {
 }
 int hashMap::coll2(int h, int i, string k) {
