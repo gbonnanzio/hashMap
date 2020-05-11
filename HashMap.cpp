@@ -312,6 +312,15 @@ int hashMap::coll2(int h, int i, string k) { //quadratic probing
 
 int hashMap::findKey(string k) {
 //NOTE: THIS METHOD CANNOT LOOP from index 0 to end of hash array looking for the key.  That destroys any efficiency in run-time. 
+	if(hashfn == true){
+		int firstIndex = calcHash1(k);
+		if((map[firstIndex]->keyword).compare == ""){
+			return -1;
+		}
+
+	}
+
+
 }
 
 
