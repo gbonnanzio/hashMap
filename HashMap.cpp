@@ -127,20 +127,6 @@ int hashMap::calcHash1(string k){
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void hashMap::getClosestPrime() {
 	int testNum = mapSize + 1;
 	bool primeCheck = isPrime(testNum);
