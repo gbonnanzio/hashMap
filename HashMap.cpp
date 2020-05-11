@@ -118,6 +118,13 @@ int hashMap::getIndex(string k) {
 
 
 int hashMap::calcHash2(string k){
+	int length = k.size();
+	int sum = 0;
+	for(int i = 0; i<length; i++){
+		sum = sum + pow(27,i)*(int)k[i];
+	}
+	int hash = sum%mapSize;
+	return hash;
 }
 
 
@@ -135,6 +142,14 @@ int hashMap::calcHash2(string k){
 
 
 int hashMap::calcHash1(string k){
+	int length = k.size();
+	int sum = 0;
+	for(int i = 0; i<length; i++){
+		sum = sum + pow((int)k[i],i+1);
+	}
+	int hash = sum%mapSize;
+	return hash;
+
 }
 
 
