@@ -27,10 +27,12 @@ hashMap::hashMap(bool hash1, bool coll1) {
 
 }
 void hashMap::addKeyValue(string k, string v) {
-
 	int Index = getIndex(k);
+	cout << k << endl;
 	hashNode* newNode = new hashNode(k, v);
+	cout <<Index<<endl;
 	if((map[Index]->keyword).compare("")==0){
+		cout << "test 5" << endl;
 		map[Index] = newNode;
 		numKeys = numKeys+1;
 	}
@@ -47,7 +49,6 @@ void hashMap::addKeyValue(string k, string v) {
 
 
 int hashMap::getIndex(string k) {
-
 	if(hashfn == true){
 		int firstIndex = calcHash1(k);
 		if((map[firstIndex]->keyword).compare("")==0){
@@ -58,12 +59,13 @@ int hashMap::getIndex(string k) {
 		}
 		else if(collfn == true){
 			hashcoll = hashcoll + 1;
-			int newIndex = coll1(firstIndex, 0, k);
+			int newIndex = coll1(firstIndex, firstIndex, k);
+			cout << newIndex << endl;
 			return newIndex;
 			}
 		else{
 			hashcoll = hashcoll + 1;
-			int newIndex = coll2(firstIndex, 0, k);
+			int newIndex = coll2(firstIndex, firstIndex, k);
 			return newIndex;
 		}
 	}
@@ -77,12 +79,12 @@ int hashMap::getIndex(string k) {
 		}
 		else if(collfn == true){
 			hashcoll = hashcoll + 1;
-			int newIndex = coll1(firstIndex, 0, k);
+			int newIndex = coll1(firstIndex, firstIndex, k);
 			return newIndex;
 		}
 		else{
 			hashcoll = hashcoll + 1;
-			int newIndex = coll2(firstIndex, 0, k);
+			int newIndex = coll2(firstIndex, firstIndex, k);
 			return newIndex;
 		}
 	}
@@ -93,7 +95,14 @@ int hashMap::getIndex(string k) {
 int hashMap::calcHash2(string k){
 	int length = k.size();
 	int sum = 0;
-	for(int i = 0; i<length; i++){
+	int templength;
+	if (length<3){
+		templength=length;
+	}
+	else {
+		templength = 3;
+	}
+	for(int i = 0; i<templength; i++){
 		sum = sum + pow(27,i)*(int)k[i];
 	}
 	int hash = sum%mapSize;
@@ -117,9 +126,17 @@ int hashMap::calcHash2(string k){
 int hashMap::calcHash1(string k){
 	int length = k.size();
 	int sum = 0;
-	for(int i = 0; i<length; i++){
+	int templength;
+	if (length<3){
+		templength=length;
+	}
+	else {
+		templength = 3;
+	}
+	for(int i = 0; i<templength; i++){
 		sum = sum + pow((int)k[i],i+1);
 	}
+	cout << sum<<endl;
 	int hash = sum%mapSize;
 	return hash;
 
@@ -195,7 +212,7 @@ void hashMap::reHash() {
 
 
 int hashMap::coll1(int h, int i, string k) { //linear probing
-	if (map[i]==NULL || (map[i]->keyword).compare(k)==0){
+	if ((map[i]->keyword).compare("")==0 || (map[i]->keyword).compare(k)==0){
 		return i;
 	}
 	else {
@@ -203,7 +220,8 @@ int hashMap::coll1(int h, int i, string k) { //linear probing
 			coll1(h,0,k);
 		}
 		else {
-			coll1(h,i+1,k);
+			int j = coll1(h,i+1,k);
+			return j;
 		}
 	}
 }

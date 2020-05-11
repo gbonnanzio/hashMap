@@ -15,6 +15,7 @@ using namespace std;
 int main() {
 	srand(time(NULL));
 	makeSeuss k("DrSeuss.txt","Seussout.txt",true,true);
+	cout << "Test 1" << endl;
 	makeSeuss m("GEChap1a.txt","GEChap1out.txt",false,true);
 
 	makeSeuss n("DrSeuss.txt","Seussout2.txt",true,false);
