@@ -13,10 +13,83 @@
 using namespace std;
 
 hashMap::hashMap(bool hash1, bool coll1) {
+	hashNode **map = new hashNode[10];
+	for(int i = 0; i < 10; i++){
+		map[i] = hashNode();
+	}
+	mapSize = 10;
+	first = map[1];
+	numKeys = 0;
+	hashfn = hash1;
+	collfn = coll1;
+	collisions = 0;
+	hashcoll = 0;
+
 }
 void hashMap::addKeyValue(string k, string v) {
+
+	int Index = getIndex(k);
+	hashNode *newNode = hashNode(k, v);
+	if((map[Index]->keyword).compare == ""){
+		map[Index] = newNode;
+		numKeys = numKeys+1;
+	}
+	else{
+		addValue(k);
+	}
+	int load = numKeys/mapSize;
+	if(load > 0.7){
+		reHash();
+	}
+	return;
+
 }
+
+
 int hashMap::getIndex(string k) {
+
+	if(hashfn == true){
+		int firstIndex = calcHash1(k);
+		if((map[firstIndex]->keyword).compare == ""){
+			return firstIndex;
+		}
+		else if((map[firstIndex]->keyword).compare == k){
+			return firstIndex;
+		}
+		else if(collfn == true){
+			hashcoll = hashcoll + 1;
+			int newIndex = coll1(firstIndex, 0, k);
+			return newIndex;
+			}
+		else{
+			hashcoll = hashcoll + 1;
+			int newIndex = coll2(firstIndex, 0, k);
+			return newIndex;
+		}
+	}
+	else{
+		int firstIndex = calcHash2(k);
+		if((map[firstIndex]->keyword).compare == ""){
+			return firstIndex;
+		}
+		else if((map[firstIndex]->keyword).compare == k){
+			return firstIndex;
+		}
+		else if(collfn == true){
+			hashcoll = hashcoll + 1;
+			int newIndex = coll1(firstIndex, 0, k);
+			return newIndex;
+		}
+		else{
+			hashcoll = hashcoll + 1;
+			int newIndex = coll2(firstIndex, 0, k);
+			return newIndex;
+		}
+	}
+
+
+
+
 }
 
 
