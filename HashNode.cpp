@@ -38,8 +38,14 @@ hashNode::hashNode(string s, string v){
 	currSize = 1;
 }
 void hashNode::addValue(string v) {
-	// adding a valu to the end of the value array associated 
+	// adding a value to the end of the value array associated
 	// with a key
+	int count=0;
+	while (values[count]!=""){
+		count++;
+	}
+	values[count]=v;
+	currSize++;
 }
 void hashNode::dblArray() {
 	// when the value array gets full, you need to make a new 
@@ -48,6 +54,13 @@ void hashNode::dblArray() {
 	//to the new values, then de-allocate the old array.  
 	//Again, just copying over, no hash functiosn involved 
 	//here.
+	valuesSize= valuesSize*2;
+	string *valuesTwo = new string[valuesSize];
+	for (int i=0;i<(currSize);i++){
+		valuesTwo[i]=values[i];
+	}
+	delete values;
+	values=valuesTwo;
 }
 
 string hashNode::getRandValue() {
@@ -56,4 +69,6 @@ string hashNode::getRandValue() {
 	//randomly select one of those words and return it.  That 
 	//will be the word that follows your key in your output 
 	//function, and it will also be the next key.
+	int num = rand() % currSize;
+	return values[num];
 }
