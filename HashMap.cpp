@@ -44,7 +44,7 @@ void hashMap::addKeyValue(string k, string v) {
 	return;
 
 }
-
+//test
 
 int hashMap::getIndex(string k) {
 
