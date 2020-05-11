@@ -13,12 +13,12 @@
 using namespace std;
 
 hashMap::hashMap(bool hash1, bool coll1) {
-	hashNode **map = new hashNode[10];
+	map = new hashNode*[10];
 	for(int i = 0; i < 10; i++){
-		map[i] = hashNode();
+		map[i] = new hashNode();
 	}
 	mapSize = 10;
-	first = map[1];
+	first = map[1]->keyword;
 	numKeys = 0;
 	hashfn = hash1;
 	collfn = coll1;
@@ -29,13 +29,13 @@ hashMap::hashMap(bool hash1, bool coll1) {
 void hashMap::addKeyValue(string k, string v) {
 
 	int Index = getIndex(k);
-	hashNode *newNode = hashNode(k, v);
-	if((map[Index]->keyword).compare == ""){
+	hashNode* newNode = new hashNode(k, v);
+	if((map[Index]->keyword).compare("")==0){
 		map[Index] = newNode;
 		numKeys = numKeys+1;
 	}
 	else{
-		addValue(k);
+		map[Index]->addValue(k);
 	}
 	int load = numKeys/mapSize;
 	if(load > 0.7){
@@ -44,16 +44,16 @@ void hashMap::addKeyValue(string k, string v) {
 	return;
 
 }
-//test
+
 
 int hashMap::getIndex(string k) {
 
 	if(hashfn == true){
 		int firstIndex = calcHash1(k);
-		if((map[firstIndex]->keyword).compare == ""){
+		if((map[firstIndex]->keyword).compare("")==0){
 			return firstIndex;
 		}
-		else if((map[firstIndex]->keyword).compare == k){
+		else if((map[firstIndex]->keyword).compare(k)==0){
 			return firstIndex;
 		}
 		else if(collfn == true){
@@ -69,10 +69,10 @@ int hashMap::getIndex(string k) {
 	}
 	else{
 		int firstIndex = calcHash2(k);
-		if((map[firstIndex]->keyword).compare == ""){
+		if((map[firstIndex]->keyword).compare("")==0){
 			return firstIndex;
 		}
-		else if((map[firstIndex]->keyword).compare == k){
+		else if((map[firstIndex]->keyword).compare(k)==0){
 			return firstIndex;
 		}
 		else if(collfn == true){
@@ -86,107 +86,7 @@ int hashMap::getIndex(string k) {
 			return newIndex;
 		}
 	}
-
-
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//test
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -266,6 +166,27 @@ bool hashMap::isPrime(int testNum){
 }
 
 void hashMap::reHash() {
+	//clone current map
+	int prevSize = mapSize;
+	hashNode* oldHashMap[prevSize];
+	for(int i = 0; i<prevSize; i++){
+		oldHashMap[i] = map[i];
+	}
+	//create and assign our new map
+	mapSize = 2*mapSize;
+	getClosestPrime();
+	hashNode* newHashMap[mapSize];
+	map = newHashMap;
+	//place old values in new map
+	for(int i = 0; i<prevSize; i++){
+		if(oldHashMap[i]!=NULL){
+			string key = oldHashMap[i]->keyword;
+			for(int j=0; j<oldHashMap[i]->currSize; j++){
+				string val = oldHashMap[i]->values[j];
+				addKeyValue(key,val);
+			}
+		}
+	}
 }
 
 
@@ -273,9 +194,8 @@ void hashMap::reHash() {
 
 
 
-
 int hashMap::coll1(int h, int i, string k) { //linear probing
-	if (map[i]==NULL || (map[i]->keyword).compare(k)!=0){
+	if (map[i]==NULL || (map[i]->keyword).compare(k)==0){
 		return i;
 	}
 	else {
@@ -287,9 +207,10 @@ int hashMap::coll1(int h, int i, string k) { //linear probing
 		}
 	}
 }
+
 int hashMap::coll2(int h, int i, string k) { //quadratic probing
 	int count = 1;
-	if (map[i]==NULL || (map[i]->keyword).compare(k)!=0){
+	if (map[i]==NULL || (map[i]->keyword).compare(k)==0){
 		return i;
 	}
 	else {
@@ -312,13 +233,62 @@ int hashMap::coll2(int h, int i, string k) { //quadratic probing
 
 int hashMap::findKey(string k) {
 //NOTE: THIS METHOD CANNOT LOOP from index 0 to end of hash array looking for the key.  That destroys any efficiency in run-time. 
+
 	if(hashfn == true){
 		int firstIndex = calcHash1(k);
-		if((map[firstIndex]->keyword).compare == ""){
+		if((map[firstIndex]->keyword).compare("")==0){
 			return -1;
 		}
-
+		else if((map[firstIndex]->keyword).compare(k)==0){
+			return firstIndex;
+		}
+		else if(collfn == true){
+			int newIndex = coll1(firstIndex, 0, k);
+			if((map[newIndex]->keyword).compare(k)==0){
+				return newIndex;
+			}
+			else{
+				return -1;
+			}
+		}
+		else{
+			int newIndex = coll2(firstIndex, 0, k);
+			if((map[newIndex]->keyword).compare(k)==0){
+				return newIndex;
+			}
+			else{
+				return -1;
+			}
+		}
 	}
+	else{
+		int firstIndex = calcHash2(k);
+		if((map[firstIndex]->keyword).compare("")==0){
+			return -1;
+		}
+		else if((map[firstIndex]->keyword).compare(k)==0){
+			return firstIndex;
+		}
+		else if(collfn == true){
+			int newIndex = coll1(firstIndex, 0, k);
+			if((map[newIndex]->keyword).compare(k)==0){
+				return newIndex;
+			}
+			else{
+				return -1;
+			}
+		}
+		else{
+			int newIndex = coll2(firstIndex, 0, k);
+			if((map[newIndex]->keyword).compare(k)==0){
+				return newIndex;
+			}
+			else{
+				return -1;
+			}
+		}
+	}
+
 
 
 }
