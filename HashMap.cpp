@@ -330,10 +330,13 @@ void hashMap::printMap() {
 using namespace std;
 
 hashMap::hashMap(bool hash1, bool coll1) {
+/*Input: a boolean indicating which hash function to use, a boolean indicating which collision function to use
+ * Output: None
+ * Action: Is a constructor to make an initial hash map
+ */
 	map = new hashNode *[11];
 	for (int i=0;i<11;i++){
-		//map[i]=new hashNode();
-		map[i]=NULL;
+		map[i]=NULL; //set all of the values to an initial empty value
 
 	}
 	first = "";
@@ -346,9 +349,12 @@ hashMap::hashMap(bool hash1, bool coll1) {
 }
 
 void hashMap::printMap() {
+/*Input: None
+ * Output: None
+ * Action: Printing all the keys and values in the map
+ */
 	cout << "In printMap()" << endl;
 	for (int i = 0; i < mapSize; i++) {
-		//cout << "In loop" << endl;
 		if (map[i] != NULL) {
 			cout << map[i]->keyword << ": ";
 			for (int j = 0; j < map[i]->currSize;j++) {
@@ -359,81 +365,80 @@ void hashMap::printMap() {
 	}
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 void hashMap::addKeyValue(string k, string v) {
-	//cout << k << mapSize <<numKeys<< endl;
-	int Index = getIndex(k);
-	if (map[Index]==NULL){
+/*Input: A string holding the key, a string holding the value
+ * Output: None
+ * Action: Add the key to the map and add it's value to the corresponding values array
+ */
+	int Index = getIndex(k); //find out which index to place the key
+	if (map[Index]==NULL){ //if no node already exists
 		map[Index]=new hashNode(k,v);
 		numKeys++;
 	}
-	else if (map[Index]!=NULL && map[Index]->keyword.compare(k)==0){
+	else if (map[Index]!=NULL && map[Index]->keyword.compare(k)==0){ //if this word is already in the map
 		map[Index]->addValue(v);
 	}
-	else {
-		collisions++;
-		if (collfn){
+	if (first==""){ //if this is the first node placed set the first value
+		first=k;
+	}
+	double ratio  = (double)numKeys/(double)mapSize;
+	if (ratio>0.7){ //if we are over 70% full in the map, make the map bigger
+		reHash();
+	}
+}
+
+int hashMap::getIndex(string k) {
+/*Input: A string holding the value of the key
+ * Output: An integer of the appropriate index in the map
+ * Action: Figure out which index the key should go to in the map
+ */
+	if (hashfn){ //if we are using hash function one
+		int Index = calcHash1(k);
+		if (map[Index]!=NULL && map[Index]->keyword.compare(k)!=0 && collfn){ //if there is at least one collision and we are using collision function one
+			collisions++;
 			int loopcounter=0;
 			while ((map[Index]!=NULL && map[Index]->keyword.compare(k)!=0)){
+				//iterating through the linear probing method until we find a spot for the key
 				Index = coll1(Index,loopcounter,k);
 				loopcounter++;
 			}
 			hashcoll=hashcoll+(loopcounter-1);
-			if (map[Index]==NULL){
-				map[Index]=new hashNode(k,v);
-				numKeys++;
-			}
-			else {
-				map[Index]->addValue(v);
-			}
 		}
-		else {
+		else if (map[Index]!=NULL && map[Index]->keyword.compare(k)!=0 && !collfn){ //if there is at least one collision and we are using collision function two
+			collisions++;
 			int loopcounter=0;
 			while ((map[Index]!=NULL && map[Index]->keyword.compare(k)!=0)){
+				//iterating through the quadratic probing method until we find a spot for the key
 				Index = coll2(Index,loopcounter,k);
 				loopcounter++;
 			}
 			hashcoll=hashcoll+(loopcounter-1);
-			if (map[Index]==NULL){
-				map[Index]=new hashNode(k,v);
-				numKeys++;
-			}
-			else {
-				map[Index]->addValue(v);
-			}
 		}
-		//keep calling collisions method until we get to a spot where we can use
-		//need to keep track of if we add a key
-		//keep track of total collisions added now
-		//keep track of hashColl
-	}
-	if (first==""){
-		first=k;
-	}
-	double ratio  = (double)numKeys/(double)mapSize;
-	if (ratio>0.7){
-		reHash();
-	}
-}
-int hashMap::getIndex(string k) {
-	if (hashfn){
-		//cout << "calc is "<<calcHash1(k)<<endl;
-		return calcHash1(k);
+		return Index;
 	}
 	else {
-		return calcHash2(k);
+		int Index = calcHash2(k);
+		if (map[Index]!=NULL && map[Index]->keyword.compare(k)!=0 && collfn){//if there is at least one collision and we are using collision function one
+			collisions++;
+			int loopcounter=0;
+			while ((map[Index]!=NULL && map[Index]->keyword.compare(k)!=0)){
+				//iterating through the linear probing method until we find a spot for the key
+				Index = coll1(Index,loopcounter,k);
+				loopcounter++;
+			}
+			hashcoll=hashcoll+(loopcounter-1);
+		}
+		else if (map[Index]!=NULL && map[Index]->keyword.compare(k)!=0 && !collfn){//if there is at least one collision and we are using collision function two
+			collisions++;
+			int loopcounter=0;
+			while ((map[Index]!=NULL && map[Index]->keyword.compare(k)!=0)){
+				//iterating through the quadratic probing method until we find a spot for the key
+				Index = coll2(Index,loopcounter,k);
+				loopcounter++;
+			}
+			hashcoll=hashcoll+(loopcounter-1);
+		}
+		return Index;
 	}
 }
 
@@ -472,42 +477,46 @@ int hashMap::calcHash1(string k){
 
 
 void hashMap::getClosestPrime() {
+/*Input: None
+ * Output: None
+ * Action: Find the closest prime to the current mapSize
+ */
 	int testNum = mapSize;
 	bool nofactors = true;
 	while (nofactors){
-		testNum++; //try the next number
-		//go through all the numbers and if we can't find any facotrs
-		//then we switch no factors to false
+		testNum++;
 		bool interiorfactors = false;
 		for (int i = 2; i<testNum; i++){
-			if (testNum%i==0){
+			if (testNum%i==0){ //if the test number has an factors we set interior factors to true
 				interiorfactors=true;
 			}
 		}
 		if (interiorfactors==false){
+			//in the case that the number tested has no factors, it is the prime we want
 			nofactors=false;
 		}
 	}
 	mapSize=testNum;
-	//this needs to change mapSize
 }
 
 
 void hashMap::reHash() {
+/*Input: None
+ * Output: None
+ * Action: Rehash all the information in the old map into a newer larger map
+ */
+	//get all of the information in the current map stored in a temp map
 	int temp = mapSize;
 	hashNode* oldHashMap[temp];
 	for (int i=0;i<temp;i++){
 		oldHashMap[i]=map[i];
 	}
+
+	//get the new larger map size
 	mapSize=mapSize*2;
 	getClosestPrime();
 
-
-	//int temp2 = mapSize;
-	//hashMap(hashfn,collfn);
-	//mapSize=temp2;
-
-	//hashNode* newHashMap[mapSize];
+	//make a new map and set all of it's spaces to Null
 	map = new hashNode*[mapSize];
 	for (int i=0;i<mapSize;i++){
 		map[i]=NULL;
@@ -516,14 +525,12 @@ void hashMap::reHash() {
 	first = "";
 	numKeys=0;
 
-
-
-	//now we need to iterate through all of the nodes in the old map and place them in the new
+	//now we need to iterate through all of the nodes in the old map and place their info in the new
 	for(int i=0;i<temp;i++){
-		if (oldHashMap[i]!=NULL){
+		if (oldHashMap[i]!=NULL){ //if the old hash map had info at this node
 			string k = oldHashMap[i]->keyword;
 			int j=0;
-			while (oldHashMap[i]->values[j]!=""){
+			while (oldHashMap[i]->values[j]!=""){ //go through all the values at this node and append them onto the new map
 				addKeyValue(k,oldHashMap[i]->values[j]);
 				j++;
 			}
@@ -531,16 +538,12 @@ void hashMap::reHash() {
 	}
 }
 
-//writing two methods that finds the new
-//index if the original hash function returns an index that is already occupied by a node with a key that isn’t the one
-//you are inserting. You will be comparing these two methods by using a separate field to keep track of the
-//secondary collisions (those that happen as a result of the probing, as opposed to those that resulted from the
-//original hash function). For these methods you can use chaining, linear probing, quadratic probing, pseudo-random
-//probing, double-hashing, or any other method you come up with. Make sure to CLEARLY document and explain
-//the methods you chose.
-
-int hashMap::coll1(int h, int i, string k){//linear probing
-	if (h+1==mapSize){
+int hashMap::coll1(int h, int i, string k){
+/*Input: An integer of the current index, an integer of the total repititions we've used this function, and a string holding the key value
+ * Output: An integer index of the next spot along using the linear probing method
+ * Action: Probe linearly if we have a collision
+ */
+	if (h+1==mapSize){ //in the case that we go out of bounds of the map
 		return 0;
 	}
 	else {
@@ -548,48 +551,19 @@ int hashMap::coll1(int h, int i, string k){//linear probing
 	}
 }
 
-int hashMap::coll2(int h, int i, string k){//quadratic probing
+int hashMap::coll2(int h, int i, string k){
+/*Input: An integer of the current index, an integer of the total repetitions we've used this function, and a string holding the key value
+ * Output: An integer index of the next spot along using the quadratic probing method
+ * Action: Probe quadratically if we have a collision
+ */
 	int change = (i+1)^2;
-	if (h+change>=mapSize){
+	if (h+change>=mapSize){//in the case that we go out of bounds of the map
 		return (h+change)%mapSize;
 	}
 	else {
 		return h+change;
 	}
 }
-
-//int hashMap::coll1(int h, int i, string k) { //linear probing
-//	if (map[i]==NULL || (map[i]->keyword).compare(k)!=0){
-//		return i;
-//	}
-//	else {
-//		if (i+1==mapSize){
-//			coll1(h,0,k);
-//		}
-//		else {
-//			coll1(h,i+1,k);
-//		}
-//	}
-//}
-//int hashMap::coll2(int h, int i, string k) { //quadratic probing
-//	int count = 1;
-//	if (map[i]==NULL || (map[i]->keyword).compare(k)!=0){
-//		return i;
-//	}
-//	else {
-//		int change= count^2;
-//		if(i+change==mapSize){
-//			count++;
-//			coll1(h,0,k);
-//		}
-//		else {
-//			count++;
-//			coll1(h,i+change,k);
-//		}
-//	}
-//}
-
-
 
 int hashMap::findKey(string k) {
 //NOTE: THIS METHOD CANNOT LOOP from index 0 to end of hash array looking for the key.  That destroys any efficiency in run-time.
