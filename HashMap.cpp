@@ -136,10 +136,11 @@ int hashMap::calcHash2(string k){
 	int sum = 0;
 	int templength;
 
-	//these if statements take care of the situation where the word is one or two letters
+	//if the word is 1 or 2 chars long use all letters
 	if (length<3){
 		templength=length;
 	}
+	//else use the first three letters
 	else {
 		templength = 3;
 	}
@@ -152,15 +153,16 @@ int hashMap::calcHash2(string k){
 int hashMap::calcHash1(string k){
 /*Input: A string holding the key value
  * Output: An integer of the corresponding hashed index
- * Action: Base 27 Hash function to calculate the index for the placement.
+ * Action: power hash of the first three letters.
  */
 	int length = k.size();
 	int sum = 0;
 	int templength;
-	//these if statements take care of the situation where the word is one or two letters
+	//if the word is 1 or 2 chars long use all letters
 	if (length<3){
 		templength=length;
 	}
+	//else use the first three letters
 	else {
 		templength = 3;
 	}
@@ -175,7 +177,7 @@ int hashMap::calcHash1(string k){
 void hashMap::getClosestPrime() {
 /*Input: None
  * Output: None
- * Action: Find the closest prime to the current mapSize
+ * Action: Find the closest prime to the current mapSize and make that the new mapSize
  */
 	int testNum = mapSize;
 	bool nofactors = true;
@@ -183,7 +185,8 @@ void hashMap::getClosestPrime() {
 		testNum++;
 		bool interiorfactors = false;
 		for (int i = 2; i<testNum; i++){
-			if (testNum%i==0){ //if the test number has an factors we set interior factors to true
+			//if the test number has a factor we set the flag to true
+			if (testNum%i==0){
 				interiorfactors=true;
 			}
 		}
@@ -201,7 +204,7 @@ void hashMap::reHash() {
  * Output: None
  * Action: Rehash all the information in the old map into a newer larger map
  */
-	//get all of the information in the current map stored in a temp map
+	//store all of the information in the current map to a temp map
 	int temp = mapSize;
 	hashNode* oldHashMap[temp];
 	for (int i=0;i<temp;i++){
@@ -221,9 +224,9 @@ void hashMap::reHash() {
 	first = "";
 	numKeys=0;
 
-	//now we need to iterate through all of the nodes in the old map and place their info in the new
+	//iterate through all of the nodes in the old map and place their info in the new one with new indices
 	for(int i=0;i<temp;i++){
-		if (oldHashMap[i]!=NULL){ //if the old hash map had info at this node
+		if (oldHashMap[i]!=NULL){ //if the old hash map had info at this node add it to new map
 			string k = oldHashMap[i]->keyword;
 			int j=0;
 			while (oldHashMap[i]->values[j]!=""){ //go through all the values at this node and append them onto the new map
@@ -239,7 +242,7 @@ int hashMap::coll1(int h, int i, string k){
  * Output: An integer index of the next spot along using the linear probing method
  * Action: Probe linearly if we have a collision
  */
-	if (h+1==mapSize){ //in the case that we go out of bounds of the map
+	if (h+1==mapSize){ //in the case that we go out of bounds of the map so we start probing from index 0
 		return 0;
 	}
 	else {
@@ -253,7 +256,7 @@ int hashMap::coll2(int h, int i, string k){
  * Action: Probe quadratically if we have a collision
  */
 	int change = (i+1)^2;
-	if (h+change>=mapSize){//in the case that we go out of bounds of the map
+	if (h+change>=mapSize){//in the case that we go out of bounds of the map so we start at a different spot
 		return (h+change)%mapSize;
 	}
 	else {
@@ -264,7 +267,7 @@ int hashMap::coll2(int h, int i, string k){
 int hashMap::findKey(string k) {
 /* Special Note: This code is never actually used in the program. Basically we found a way where this function was not
  * needed because most of the work is done in getIndex. We asked Professor Yarrington about it, and she said this was an
- * acceptable to complete the project.
+ * acceptable approach to complete the project.
  * Input: A string containing the value of the key
  * Output: An integer indicating a location of where the key is in the map
  * Action: Find the location of an integer in the map, or indicate if it does not exist
