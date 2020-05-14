@@ -72,7 +72,7 @@ public:
 			//double the map Size, and then set mapSize to 
 			//that new prime - you can find the prime in
 			//another way if you choose
-	bool isPrime(int testNum);
+	//bool isPrime(int testNum);
 	void reHash();  // when size of array is at 70%, double 
 			//array size and rehash keys
 	int coll1(int h, int i, string k);  // a probing method 

@@ -38,25 +38,30 @@ hashNode::hashNode(string s, string v){
 	currSize = 1;
 }
 void hashNode::addValue(string v) {
-	// adding a value to the end of the value array associated
-	// with a key
+/*Input: a string holding the word after our key
+ * Output: Nothing
+ * Action: adding a value to the end of the value array associated with a key
+ */
 	int count=0;
 	while (values[count]!=""){
+		//go through the values array until we reach an empty space
 		count++;
 	}
-	values[count]=v;
+	values[count]=v; //place the value in the array
 	currSize++;
+	if (currSize==valuesSize){
+		//if the values array is full call dblArray to double the size of the array
+		dblArray();
+	}
 }
 void hashNode::dblArray() {
-	// when the value array gets full, you need to make a new 
-	// array twice the size of the old one (just double, no 
-	//going to next prime) and then copy over the old values 
-	//to the new values, then de-allocate the old array.  
-	//Again, just copying over, no hash functiosn involved 
-	//here.
+/*Input: None
+ * Output:None
+ * Action: Double the size of the array and copy over old values
+ */
 	valuesSize= valuesSize*2;
 	string *valuesTwo = new string[valuesSize];
-	for (int i=0;i<(currSize);i++){
+	for (int i=0;i<(currSize);i++){ //copying over the values
 		valuesTwo[i]=values[i];
 	}
 	delete values;
@@ -64,11 +69,10 @@ void hashNode::dblArray() {
 }
 
 string hashNode::getRandValue() {
-	//Every key has a values array - an array of words that 
-	// follow that key in the text document.  You're going to 
-	//randomly select one of those words and return it.  That 
-	//will be the word that follows your key in your output 
-	//function, and it will also be the next key.
+/*Input: Nothing
+ * Output: a string holding the randomly selected value
+ * Action: Randomly choose a single value from the array of values.
+ */
 	int num = rand() % currSize;
 	return values[num];
 }
